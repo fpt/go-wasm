@@ -1,37 +1,33 @@
 package parser
 
 import (
-	"bufio"
 	"log"
 )
 
-func Section(bufr *bufio.Reader) {
-	b, err := bufr.ReadByte()
-	if err != nil {
-		log.Fatalf("Error occured %s", err)
-	}
-	typ := int(b)
-	secsize := U32(bufr)
+func Section(wr *WasmReader) {
+	typ := wr.ReadType()
+	secsize := wr.ReadU32()
+
 	log.Printf("section size: %d", secsize)
 	if typ == 1 {
-		veclen := U32(bufr)
+		veclen := wr.ReadU32()
 		log.Printf("funcvec len: %d", veclen)
-		for secsize > 0 && veclen > 0 {
-			secsize -= Function(bufr)
+		for veclen > 0 {
+			Function(wr)
 			veclen -= 1
 		}
 	} else if typ == 2 {
-		veclen := U32(bufr)
+		veclen := wr.ReadU32()
 		log.Printf("importvec len: %d", veclen)
 		for veclen > 0 {
-			Import(bufr)
+			Import(wr)
 			veclen -= 1
 		}
 	} else if typ == 3 {
-		veclen := U32(bufr)
+		veclen := wr.ReadU32()
 		log.Printf("funcsec len: %d", veclen)
 		for veclen > 0 {
-			typeidx := U32(bufr)
+			typeidx := wr.ReadU32()
 			log.Printf("typeidx: %d", typeidx)
 			veclen -= 1
 		}
@@ -42,15 +38,15 @@ func Section(bufr *bufio.Reader) {
 	} else if typ == 6 {
 		log.Printf("globalsec")
 	} else if typ == 7 {
-		veclen := U32(bufr)
+		veclen := wr.ReadU32()
 		log.Printf("exportsec veclen: %d", veclen)
 		for veclen > 0 {
-			nm := Name(bufr)
+			nm := wr.ReadName()
 			log.Printf("name: %s", nm)
-			idx := U32(bufr)
+			idx := wr.ReadU32()
 			log.Printf("idx: %d", idx)
 			if idx == 0 {
-				funcidx := U32(bufr)
+				funcidx := wr.ReadU32()
 				log.Printf("funcidx: %d", funcidx)
 			}
 			veclen -= 1
@@ -60,33 +56,35 @@ func Section(bufr *bufio.Reader) {
 	} else if typ == 9 {
 		log.Printf("elementsec")
 	} else if typ == 10 {
-		veclen := U32(bufr)
+		veclen := wr.ReadU32()
 		log.Printf("codesec veclen: %d", veclen)
 		for veclen > 0 {
-			size := U32(bufr)
+			size := wr.ReadU32()
 			log.Printf("codesec size: %d", size)
-			nlocals := U32(bufr)
+			nlocals := wr.ReadU32()
 			log.Printf("codesec nlocals: %d", nlocals)
 			for nlocals > 0 {
-				n := U32(bufr)
+				n := wr.ReadU32()
 				log.Printf("codesec n: %d", n)
-				t := U32(bufr)
+				t := wr.ReadU32()
 				log.Printf("codesec t: %d", t)
 				nlocals -= 1
 			}
-			doExpr(bufr)
+			Expr(wr)
 			veclen -= 1
 		}
 	} else if typ == 11 {
-		log.Printf("datasec")
-		veclen := U32(bufr)
+		veclen := wr.ReadU32()
 		log.Printf("datasec len: %d", veclen)
 		for veclen > 0 {
-			memidx := U32(bufr)
+			memidx := wr.ReadU32()
 			log.Printf("datasec memidx: %d", memidx)
-			doExpr(bufr)
-			vecb := U32(bufr)
+			Expr(wr)
+			vecb := wr.ReadU32()
 			log.Printf("datasec vecb: %d", vecb)
+
+			// TODO: workaround
+			bufr := wr.Reader()
 			for vecb > 0 {
 				b, err := bufr.ReadByte()
 				if err != nil {

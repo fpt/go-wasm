@@ -1,11 +1,14 @@
 package parser
 
 import (
-	"bufio"
 	"log"
 )
 
-func doExpr(bufr *bufio.Reader) {
+func Expr(wr *WasmReader) {
+
+	// TODO: Workaround
+	bufr := wr.Reader()
+
 	for {
 		instr, err := bufr.ReadByte()
 		if err != nil {

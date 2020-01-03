@@ -1,20 +1,20 @@
 package parser
 
 import (
-	"bufio"
 	"log"
 )
 
-func Function(bufr *bufio.Reader) uint32 {
-	b, err := bufr.ReadByte()
-	if err != nil {
-		log.Fatalf("Error occured %s", err)
-	}	
-	typ := int(b)
+func Function(wr *WasmReader) uint32 {
+	typ := wr.ReadType()
+
 	if typ != 0x60 {
 		log.Fatalf("Function expected. %x", typ)
 	}
 	log.Printf("func")
+
+	// TODO: Workaround
+	bufr := wr.Reader()
+
 	var c uint32
 	c = 0
 	c += ValTypeVec(bufr)
