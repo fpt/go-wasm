@@ -1,13 +1,21 @@
 package main
 
 import (
+	"flag"
 	"log"
 
 	"net.fujlog/go-wasm/parser"
 )
 
 func main() {
-	wr, err := parser.NewWasmReader("./wasm/a.out.wasm")
+	flag.Parse()
+	args := flag.Args()
+
+	if len(args) < 1 {
+		log.Fatalf("need one arg")
+	}
+
+	wr, err := parser.NewWasmReader(args[0])
 	if err != nil {
 		log.Fatalf("Error occured %s", err)
 	}

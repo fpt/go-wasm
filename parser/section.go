@@ -8,8 +8,11 @@ func Section(wr *WasmReader) {
 	typ := wr.ReadType()
 	secsize := wr.ReadU32()
 
-	log.Printf("section size: %d", secsize)
-	if typ == 1 {
+	log.Printf("section type: %d, size: %d", typ, secsize)
+	if typ == 0 {
+		nm := wr.ReadName()
+		log.Printf("custom section name: %s", nm)
+	} else if typ == 1 {
 		veclen := wr.ReadU32()
 		log.Printf("funcvec len: %d", veclen)
 		for veclen > 0 {
@@ -84,12 +87,8 @@ func Section(wr *WasmReader) {
 			log.Printf("datasec vecb: %d", vecb)
 
 			// TODO: workaround
-			bufr := wr.Reader()
 			for vecb > 0 {
-				b, err := bufr.ReadByte()
-				if err != nil {
-					log.Fatalf("Error occured %s", err)
-				}
+				b := wr.ReadByte()
 				log.Printf("byte: %x", b)
 				vecb -= 1
 			}

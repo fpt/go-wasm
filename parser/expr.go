@@ -6,14 +6,8 @@ import (
 
 func Expr(wr *WasmReader) {
 
-	// TODO: Workaround
-	bufr := wr.Reader()
-
 	for {
-		instr, err := bufr.ReadByte()
-		if err != nil {
-			log.Fatalf("Error occured %s", err)
-		}
+		instr := wr.ReadByte()
 		switch instr {
 		case 0x00:
 			log.Printf("unreachable")
@@ -38,7 +32,7 @@ func Expr(wr *WasmReader) {
 			log.Printf("return")
 		case 0x10:
 			log.Printf("call")
-			funcidx := U32(bufr)
+			funcidx := wr.ReadU32()
 			log.Printf("call funcidx: %d", funcidx)
 		case 0x11:
 			log.Printf("call_indirect")
@@ -104,11 +98,11 @@ func Expr(wr *WasmReader) {
 			log.Printf("memory.grow")
 		case 0x41:
 			log.Printf("i32.const")
-			n := U32(bufr)
+			n := wr.ReadU32()
 			log.Printf("i32.const n: %d", n)
 		case 0x42:
 			log.Printf("i64.const")
-			n := U32(bufr)
+			n := wr.ReadU32()
 			log.Printf("i64.const n: %d", n)
 		case 0x43:
 			log.Printf("f32.const")

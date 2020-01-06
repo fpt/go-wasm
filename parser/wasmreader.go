@@ -8,7 +8,7 @@ import (
 )
 
 type WasmReader struct {
-	rdr *bufio.Reader
+	rdr  *bufio.Reader
 	file *os.File
 }
 
@@ -61,6 +61,14 @@ func (wr *WasmReader) ReadType() int {
 		log.Fatalf("Error occured %s", err)
 	}
 	return int(b)
+}
+
+func (wr *WasmReader) ReadByte() byte {
+	b, err := wr.rdr.ReadByte()
+	if err != nil {
+		log.Fatalf("Error occured %s", err)
+	}
+	return b
 }
 
 func (wr *WasmReader) ReadU32() uint32 {
